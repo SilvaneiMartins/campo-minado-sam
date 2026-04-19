@@ -2,6 +2,7 @@
 #include "init_sdl.h"
 
 void game_events(struct Game *g);
+void game_draw(const struct Game *g);
 
 bool game_new(struct Game **game)
 {
@@ -15,12 +16,19 @@ bool game_new(struct Game **game)
 
     struct Game *g = *game;
 
+    g->is_running = true;
+    g->rows = 9;
+    g->columns = 9;
+
     if (!game_init_sdl(g))
     {
         return false;
     }
 
-    g->is_running = true;
+    if (!border_new(&g->border, g->renderer, g->rows, g->columns))
+    {
+        return false;
+    }
 
     return true;
 }
@@ -30,6 +38,11 @@ void game_free(struct Game **game)
     if (*game)
     {
         struct Game *g = *game;
+
+        if (g->border)
+        {
+            border_free(&g->border);
+        }
 
         if (g->renderer)
         {
@@ -78,17 +91,25 @@ void game_events(struct Game *g)
     }
 }
 
+void game_draw(const struct Game *g)
+{
+    SDL_RenderClear(g->renderer);
+
+    border_draw(g->border);
+
+    SDL_RenderPresent(g->renderer);
+}
+
 bool game_run(struct Game *g)
 {
     while (g->is_running)
     {
         game_events(g);
 
-        SDL_RenderClear(g->renderer);
+        game_draw(g);
 
-        // TODO: DESENHA A TELA
-
-        SDL_RenderPresent(g->renderer);
         SDL_Delay(16);
     }
+
+    return true;
 }
