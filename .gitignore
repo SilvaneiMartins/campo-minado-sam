@@ -1,0 +1,50 @@
+# =========================
+# BUILD
+# =========================
+build/
+*.o
+*.out
+*.exe
+*.dll
+
+# =========================
+# SDL3 (IGNORAR COMPLETAMENTE)
+# =========================
+SDL3/
+SDL3_image/
+
+# =========================
+# VSCode / IDE
+# =========================
+.vscode/
+*.code-workspace
+
+# =========================
+# CONFIG LOCAL
+# =========================
+.clangd
+.clang-format
+compile_commands.json
+
+# =========================
+# SISTEMA
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# TEMP / LOGS
+# =========================
+*.log
+*.tmp
+*.cache
+
+# =========================
+# IMAGENS GERADAS (opcional)
+# =========================
+# images/ (descomente se quiser ignorar imagens)
+
+# =========================
+# OUTROS
+# =========================
+nul
