@@ -1,6 +1,7 @@
 # 💣 CAMPO MINADO SAM (C + SDL3)
 
 ![Screenshot](screenshot.png)
+![Screenshot](screenshot2.png)
 
 Implementação do clássico **Campo Minado** desenvolvida em **C** utilizando a biblioteca **SDL3**.
 
