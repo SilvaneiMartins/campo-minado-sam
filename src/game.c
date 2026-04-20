@@ -2,7 +2,7 @@
 #include "init_sdl.h"
 
 void game_events(struct Game *g);
-void game_draw(const struct Game *g);
+void game_draw(struct Game *g);
 
 bool game_new(struct Game **game)
 {
@@ -91,7 +91,7 @@ void game_events(struct Game *g)
     }
 }
 
-void game_draw(const struct Game *g)
+void game_draw(struct Game *g)
 {
     SDL_RenderClear(g->renderer);
 
@@ -100,7 +100,7 @@ void game_draw(const struct Game *g)
     SDL_RenderPresent(g->renderer);
 }
 
-bool game_run(struct Game *g)
+void game_run(struct Game *g)
 {
     while (g->is_running)
     {
@@ -110,6 +110,4 @@ bool game_run(struct Game *g)
 
         SDL_Delay(16);
     }
-
-    return true;
 }

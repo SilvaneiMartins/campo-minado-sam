@@ -11,14 +11,9 @@ int main(void)
         return exit_status;
     }
 
-    if (!game_run(game))
-    {
-        fprintf(stderr, "The game loop terminated with an error.\n");
-    }
-    else
-    {
-        exit_status = EXIT_SUCCESS;
-    }
+    game_run(game);
+
+    exit_status = EXIT_SUCCESS;
 
     game_free(&game);
     return exit_status;

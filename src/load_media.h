@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-bool load_media_sheet(SDL_Renderer *renderer, SDL_Texture **image, const char *file_path, int width, int height, SDL_FRect **src_rect);
+bool load_media_sheet(SDL_Renderer *renderer, SDL_Texture **image, const char *file_path, int width, int height, SDL_FRect **src_rects);
 
 #endif

@@ -7,7 +7,7 @@ struct Border
 {
     SDL_Renderer *renderer;
     SDL_Texture *image;
-    SDL_FRect *src_rect;
+    SDL_FRect *src_rects;
     unsigned rows;
     unsigned columns;
     float piece_height;
