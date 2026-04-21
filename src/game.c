@@ -30,6 +30,11 @@ bool game_new(struct Game **game)
         return false;
     }
 
+    if (!board_new(&g->board, g->renderer, g->rows, g->columns))
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -38,6 +43,11 @@ void game_free(struct Game **game)
     if (*game)
     {
         struct Game *g = *game;
+
+        if (g->board)
+        {
+            board_free(&g->board);
+        }
 
         if (g->border)
         {
@@ -96,6 +106,7 @@ void game_draw(struct Game *g)
     SDL_RenderClear(g->renderer);
 
     border_draw(g->border);
+    board_draw(g->board);
 
     SDL_RenderPresent(g->renderer);
 }

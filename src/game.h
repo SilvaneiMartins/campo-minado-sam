@@ -3,12 +3,14 @@
 
 #include "main.h"
 #include "border.h"
+#include "board.h"
 
 struct Game
 {
     SDL_Window *window;
     SDL_Renderer *renderer;
     struct Border *border;
+    struct Board *board;
     unsigned rows;
     unsigned columns;
     SDL_Event event;

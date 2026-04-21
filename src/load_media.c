@@ -30,7 +30,7 @@ bool load_media_sheet(SDL_Renderer *renderer, SDL_Texture **image, const char *f
         return false;
     }
 
-    *src_rects = calloc(1, sizeof(SDL_FRect) * max_rows * max_columns);
+    *src_rects = calloc((size_t)(max_rows * max_columns), sizeof(SDL_FRect));
     if (*src_rects == NULL)
     {
         fprintf(stderr, "Error in callon of src_rects.\n");
