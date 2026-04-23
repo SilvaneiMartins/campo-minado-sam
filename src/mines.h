@@ -10,13 +10,12 @@ struct Mines
     SDL_Texture *digit_image;
     SDL_FRect *back_src_rects;
     SDL_FRect *digit_src_rects;
-    SDL_FRect *back_dest_rects;
+    SDL_FRect back_dest_rect;
     float digit_width;
     float digit_height;
-}
+};
 
-bool
-mines_new(struct Mines **mines, SDL_Renderer *renderer);
+bool mines_new(struct Mines **mines, SDL_Renderer *renderer);
 void mines_free(struct Mines **mines);
 void mines_draw(const struct Mines *m);
 

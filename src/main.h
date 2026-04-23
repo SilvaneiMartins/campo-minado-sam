@@ -26,6 +26,6 @@
 #define DIGIT_BACK_RIGHT 3
 
 #define DIGIT_WIDTH 13
-#define DIGIT_HEIGHT 46
+#define DIGIT_HEIGHT 23
 
 #endif

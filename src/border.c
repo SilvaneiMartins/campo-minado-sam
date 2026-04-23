@@ -54,7 +54,7 @@ void border_free(struct Border **border)
         b = NULL;
         *border = NULL;
 
-        printf("Free Border.\n");
+        printf("Free border.\n");
     }
 }
 
