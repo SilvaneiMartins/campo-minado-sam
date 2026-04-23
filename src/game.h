@@ -6,6 +6,7 @@
 #include "board.h"
 #include "mines.h"
 #include "clock.h"
+#include "face.h"
 
 struct Game
 {
@@ -15,10 +16,12 @@ struct Game
     struct Board *board;
     struct Mines *mines;
     struct Clock *clock;
+    struct Face *face;
     unsigned rows;
     unsigned columns;
     SDL_Event event;
     bool is_running;
+    int mine_count;
 };
 
 bool game_new(struct Game **game);

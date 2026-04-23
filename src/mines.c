@@ -84,6 +84,6 @@ void mines_draw(const struct Mines *m)
     for (int i = 0; i < 3; i++)
     {
         digit_rect.x = m->back_dest_rect.x + 2 + digit_rect.w * (float)i;
-        SDL_RenderTexture(m->renderer, m->digit_image, &m->digit_src_rects[11], &digit_rect);
+        SDL_RenderTexture(m->renderer, m->digit_image, &m->digit_src_rects[0], &digit_rect);
     }
 }

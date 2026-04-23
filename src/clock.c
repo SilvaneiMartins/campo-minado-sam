@@ -85,6 +85,6 @@ void clock_draw(const struct Clock *c)
     for (int i = 0; i < 3; i++)
     {
         digit_rect.x = c->back_dest_rect.x + 2 + digit_rect.w * (float)i;
-        SDL_RenderTexture(c->renderer, c->digit_image, &c->digit_src_rects[11], &digit_rect);
+        SDL_RenderTexture(c->renderer, c->digit_image, &c->digit_src_rects[0], &digit_rect);
     }
 }

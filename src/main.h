@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define SDL_FLAGS SDL_INIT_VIDEO
 
@@ -27,5 +28,8 @@
 
 #define DIGIT_WIDTH 13
 #define DIGIT_HEIGHT 23
+
+#define FACE_SIZE 26
+#define FACE_TOP 15
 
 #endif

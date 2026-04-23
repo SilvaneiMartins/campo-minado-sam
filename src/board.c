@@ -4,7 +4,7 @@
 void board_free_array(struct Board *b);
 bool board_callon_array(struct Board *b);
 
-bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows, unsigned columns)
+bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows, unsigned columns, int mine_count)
 {
     *board = calloc(1, sizeof(struct Board));
     if (*board == NULL)
@@ -18,6 +18,7 @@ bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows, unsi
     b->renderer = renderer;
     b->rows = rows;
     b->columns = columns;
+    b->mine_count = mine_count;
 
     b->piece_size = PIECE_SIZE * 2;
     b->top_offset = BORDER_HEIGHT * 2;
@@ -28,7 +29,7 @@ bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows, unsi
         return false;
     }
 
-    if (!board_reset(b))
+    if (!board_reset(b, b->mine_count))
     {
         return false;
     }
@@ -51,6 +52,21 @@ void board_free_array(struct Board *b)
 
         free(b->from_array);
         b->from_array = NULL;
+    }
+
+    if (b->back_array)
+    {
+        for (unsigned row = 0; row < b->rows; row++)
+        {
+            if (b->back_array[row])
+            {
+                free(b->back_array[row]);
+                b->back_array[row] = NULL;
+            }
+        }
+
+        free(b->back_array);
+        b->back_array = NULL;
     }
 }
 
@@ -104,11 +120,31 @@ bool board_callon_array(struct Board *b)
         }
     }
 
+    b->back_array = calloc(b->rows, sizeof(unsigned *));
+    if (b->back_array == NULL)
+    {
+        fprintf(stderr, "Erro in callon of back array of rows. \n");
+        return false;
+    }
+
+    for (unsigned row = 0; row < b->rows; row++)
+    {
+        b->back_array[row] = calloc(b->columns, sizeof(unsigned));
+
+        if (b->back_array[row] == NULL)
+        {
+            fprintf(stderr, "Error in callon of back array of columns. \n");
+            return false;
+        }
+    }
+
     return true;
 }
 
-bool board_reset(struct Board *b)
+bool board_reset(struct Board *b, int mine_count)
 {
+    b->mine_count = mine_count;
+
     board_free_array(b);
 
     if (!board_callon_array(b))
@@ -121,6 +157,52 @@ bool board_reset(struct Board *b)
         for (unsigned column = 0; column < b->columns; column++)
         {
             b->from_array[row][column] = 9;
+        }
+    }
+
+    int add_mines = b->mine_count;
+
+    while (add_mines > 0)
+    {
+        int r = rand() % (int)b->rows;
+        int c = rand() % (int)b->columns;
+
+        if (!b->back_array[r][c])
+        {
+            b->back_array[r][c] = 13;
+            add_mines--;
+        }
+    }
+
+    for (int row = 0; row < (int)b->rows; row++)
+    {
+        for (int column = 0; column < (int)b->columns; column++)
+        {
+            unsigned close_mines = 0;
+
+            if (b->back_array[row][column] == 13)
+            {
+                continue;
+            }
+
+            for (int r = row - 1; r < row + 2; r++)
+            {
+                if (r >= 0 && r < (int)b->rows)
+                {
+                    for (int c = column - 1; c < column + 2; c++)
+                    {
+                        if (c >= 0 && (int)b->columns)
+                        {
+                            if (b->back_array[r][c] == 13)
+                            {
+                                close_mines++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            b->back_array[row][column] = close_mines;
         }
     }
 
@@ -138,7 +220,7 @@ void board_draw(const struct Board *b)
         for (unsigned column = 0; column < b->columns; column++)
         {
             dest_rect.x = (float)column * b->piece_size + b->left_offset;
-            unsigned index = b->from_array[row][column];
+            unsigned index = b->back_array[row][column];
             SDL_RenderTexture(b->renderer, b->image, &b->src_rects[index], &dest_rect);
         }
     }

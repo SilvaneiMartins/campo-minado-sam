@@ -19,18 +19,21 @@ bool game_new(struct Game **game)
     g->is_running = true;
     g->rows = 9;
     g->columns = 9;
+    g->mine_count = 8;
 
     if (!game_init_sdl(g))
     {
         return false;
     }
 
+    srand((unsigned)time(NULL));
+
     if (!border_new(&g->border, g->renderer, g->rows, g->columns))
     {
         return false;
     }
 
-    if (!board_new(&g->board, g->renderer, g->rows, g->columns))
+    if (!board_new(&g->board, g->renderer, g->rows, g->columns, g->mine_count))
     {
         return false;
     }
@@ -45,6 +48,11 @@ bool game_new(struct Game **game)
         return false;
     }
 
+    if (!face_new(&g->face, g->renderer, g->columns))
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -53,6 +61,11 @@ void game_free(struct Game **game)
     if (*game)
     {
         struct Game *g = *game;
+
+        if (g->face)
+        {
+            face_free(&g->face);
+        }
 
         if (g->clock)
         {
@@ -129,6 +142,7 @@ void game_draw(struct Game *g)
     board_draw(g->board);
     mines_draw(g->mines);
     clock_draw(g->clock);
+    face_draw(g->face);
 
     SDL_RenderPresent(g->renderer);
 }
