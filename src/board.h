@@ -13,15 +13,26 @@ struct Board
     unsigned rows;
     unsigned columns;
     float piece_size;
-    float left_offset;
-    float top_offset;
     int mine_count;
+    SDL_FRect rect;
+    bool left_pressed;
+    bool right_pressed;
+    struct Node *check_head;
+};
+
+struct Node
+{
+    struct Node *next;
+    int row;
+    int column;
 };
 
 bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows,
                unsigned columns, int mine_count);
 void board_free(struct Board **board);
 bool board_reset(struct Board *g, int mine_count);
+void board_mouse_down(struct Board *b, float x, float y, Uint8 button);
+bool board_mouse_up(struct Board *b, float x, float y, Uint8 button);
 void board_draw(const struct Board *b);
 
 #endif

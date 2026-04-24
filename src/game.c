@@ -1,7 +1,7 @@
 #include "game.h"
 #include "init_sdl.h"
 
-void game_events(struct Game *g);
+bool game_events(struct Game *g);
 void game_draw(struct Game *g);
 
 bool game_new(struct Game **game)
@@ -109,7 +109,7 @@ void game_free(struct Game **game)
     }
 }
 
-void game_events(struct Game *g)
+bool game_events(struct Game *g)
 {
     while (SDL_PollEvent(&g->event))
     {
@@ -117,6 +117,15 @@ void game_events(struct Game *g)
         {
         case SDL_EVENT_QUIT:
             g->is_running = false;
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            board_mouse_down(g->board, g->event.button.x, g->event.button.y, g->event.button.button);
+            break;
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            if (!board_mouse_up(g->board, g->event.button.x, g->event.button.y, g->event.button.button))
+            {
+                return false;
+            }
             break;
         case SDL_EVENT_KEY_DOWN:
             switch (g->event.key.scancode)
@@ -132,6 +141,8 @@ void game_events(struct Game *g)
             break;
         }
     }
+
+    return true;
 }
 
 void game_draw(struct Game *g)
@@ -147,14 +158,19 @@ void game_draw(struct Game *g)
     SDL_RenderPresent(g->renderer);
 }
 
-void game_run(struct Game *g)
+bool game_run(struct Game *g)
 {
     while (g->is_running)
     {
-        game_events(g);
+        if (!game_events(g))
+        {
+            return false;
+        }
 
         game_draw(g);
 
         SDL_Delay(16);
     }
+
+    return true;
 }
