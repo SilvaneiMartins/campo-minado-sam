@@ -21,6 +21,7 @@ struct Game
     unsigned columns;
     SDL_Event event;
     bool is_running;
+    bool is_playing;
     int mine_count;
 };
 

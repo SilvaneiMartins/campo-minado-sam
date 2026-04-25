@@ -6,6 +6,8 @@ bool board_callon_array(struct Board *b);
 bool board_push_check(struct Board *b, int row, int column);
 struct Node board_pop_check(struct Board *b);
 bool board_uncover(struct Board *b);
+void board_reveal(struct Board *b);
+void board_check_won(struct Board *b);
 
 bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows, unsigned columns, int mine_count)
 {
@@ -34,7 +36,7 @@ bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows, unsi
         return false;
     }
 
-    if (!board_reset(b, b->mine_count))
+    if (!board_reset(b, b->mine_count, true))
     {
         return false;
     }
@@ -146,22 +148,37 @@ bool board_callon_array(struct Board *b)
     return true;
 }
 
-bool board_reset(struct Board *b, int mine_count)
+bool board_reset(struct Board *b, int mine_count, bool full_reset)
 {
     b->mine_count = mine_count;
 
-    board_free_array(b);
-
-    if (!board_callon_array(b))
+    if (full_reset)
     {
-        return false;
-    }
+        board_free_array(b);
 
-    for (unsigned row = 0; row < b->rows; row++)
-    {
-        for (unsigned column = 0; column < b->columns; column++)
+        if (!board_callon_array(b))
         {
-            b->from_array[row][column] = 9;
+            return false;
+        }
+
+        for (unsigned row = 0; row < b->rows; row++)
+        {
+            for (unsigned column = 0; column < b->columns; column++)
+            {
+                b->from_array[row][column] = 9;
+            }
+        }
+    }
+    else
+    {
+        for (unsigned row = 0; row < b->rows; row++)
+        {
+            for (unsigned column = 0; column < b->columns; column++)
+            {
+                b->back_array[row][column] = 0;
+                unsigned elem = b->from_array[row][column];
+                b->from_array[row][column] = (elem == 10 || elem == 11) ? elem : 9;
+            }
         }
     }
 
@@ -211,7 +228,20 @@ bool board_reset(struct Board *b, int mine_count)
         }
     }
 
+    b->first_turn = true;
+    b->game_state = GAME_PLAY;
+
     return true;
+}
+
+enum GameState board_game_state(const struct Board *b)
+{
+    return b->game_state;
+}
+
+bool board_is_pressed(const struct Board *b)
+{
+    return b->left_pressed || b->right_pressed;
 }
 
 bool board_uncover(struct Board *b)
@@ -286,6 +316,44 @@ struct Node board_pop_check(struct Board *b)
     }
 
     return pos;
+}
+
+void board_reveal(struct Board *b)
+{
+    for (unsigned row = 0; row < b->rows; row++)
+    {
+        for (unsigned column = 0; column < b->columns; column++)
+        {
+            if (b->from_array[row][column] == 9 && b->back_array[row][column] == 13)
+            {
+                b->from_array[row][column] = 13;
+            }
+
+            if (b->from_array[row][column] == 10 && b->back_array[row][column] != 13)
+            {
+                b->from_array[row][column] = 15;
+            }
+        }
+    }
+}
+
+void board_check_won(struct Board *b)
+{
+    for (unsigned row = 0; row < b->rows; row++)
+    {
+        for (unsigned column = 0; column < b->columns; column++)
+        {
+            if (b->back_array[row][column] != 13)
+            {
+                if (b->back_array[row][column] != b->from_array[row][column])
+                {
+                    return;
+                }
+            }
+        }
+    }
+
+    b->game_state = GAME_WON;
 }
 
 void board_mouse_down(struct Board *b, float x, float y, Uint8 button)
@@ -366,28 +434,56 @@ bool board_mouse_up(struct Board *b, float x, float y, Uint8 button)
     {
         if (b->from_array[row][column] == 9)
         {
-            if (b->back_array[row][column] == 13)
+            while (true)
             {
-                b->from_array[row][column] = 14;
-            }
-            else
-            {
-                b->from_array[row][column] = b->back_array[row][column];
-
-                if (b->back_array[row][column] == 0)
+                if (b->back_array[row][column] == 13)
                 {
-                    if (!board_push_check(b, row, column))
+                    b->from_array[row][column] = 14;
+                    b->game_state = GAME_LOST;
+                }
+                else
+                {
+                    b->from_array[row][column] = b->back_array[row][column];
+
+                    if (b->back_array[row][column] == 0)
                     {
-                        return false;
+                        if (!board_push_check(b, row, column))
+                        {
+                            return false;
+                        }
+
+                        if (!board_uncover(b))
+                        {
+                            return false;
+                        }
                     }
 
-                    if (!board_uncover(b))
+                    board_check_won(b);
+                }
+
+                if (b->first_turn && b->game_state != GAME_PLAY)
+                {
+                    printf("Foi resetado. \n");
+                    if (!board_reset(b, b->mine_count, false))
                     {
                         return false;
                     }
                 }
+                else
+                {
+                    break;
+                }
+            }
+
+            b->first_turn = false;
+
+            if (b->game_state != GAME_PLAY)
+            {
+                board_reveal(b);
             }
         }
+
+        // return true;
     }
 
     if (button == SDL_BUTTON_RIGHT)

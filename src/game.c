@@ -1,8 +1,13 @@
 #include "game.h"
+#include "board.h"
+#include "face.h"
 #include "init_sdl.h"
 
+bool game_reset(struct Game *g);
 bool game_events(struct Game *g);
 void game_draw(struct Game *g);
+void game_mouse_down(struct Game *g, float x, float y, Uint8 button);
+bool game_mouse_up(struct Game *g, float x, float y, Uint8 button);
 
 bool game_new(struct Game **game)
 {
@@ -17,6 +22,7 @@ bool game_new(struct Game **game)
     struct Game *g = *game;
 
     g->is_running = true;
+    g->is_playing = true;
     g->rows = 9;
     g->columns = 9;
     g->mine_count = 8;
@@ -109,6 +115,75 @@ void game_free(struct Game **game)
     }
 }
 
+bool game_reset(struct Game *g)
+{
+    if (!board_reset(g->board, g->mine_count, true))
+    {
+        return false;
+    }
+
+    g->is_playing = true;
+
+    return true;
+}
+
+void game_mouse_down(struct Game *g, float x, float y, Uint8 button)
+{
+    if (button == SDL_BUTTON_LEFT)
+    {
+        face_mouse_click(g->face, x, y, true);
+    }
+
+    if (g->is_playing)
+    {
+        board_mouse_down(g->board, x, y, button);
+
+        if (board_is_pressed(g->board))
+        {
+            face_question(g->face);
+        }
+    }
+}
+
+bool game_mouse_up(struct Game *g, float x, float y, Uint8 button)
+{
+    if (button == SDL_BUTTON_LEFT)
+    {
+        if (face_mouse_click(g->face, x, y, false))
+        {
+            if (!game_reset(g))
+            {
+                return false;
+            }
+        }
+    }
+
+    if (g->is_playing)
+    {
+        if (!board_mouse_up(g->board, x, y, button))
+        {
+            return false;
+        }
+    }
+
+    if (board_game_state(g->board) == GAME_WON)
+    {
+        face_wont(g->face);
+        g->is_playing = false;
+    }
+    else if (board_game_state(g->board) == GAME_LOST)
+    {
+        face_lost(g->face);
+        g->is_playing = false;
+    }
+    else
+    {
+        face_default(g->face);
+    }
+
+    return true;
+}
+
 bool game_events(struct Game *g)
 {
     while (SDL_PollEvent(&g->event))
@@ -119,10 +194,10 @@ bool game_events(struct Game *g)
             g->is_running = false;
             break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
-            board_mouse_down(g->board, g->event.button.x, g->event.button.y, g->event.button.button);
+            game_mouse_down(g, g->event.button.x, g->event.button.y, g->event.button.button);
             break;
         case SDL_EVENT_MOUSE_BUTTON_UP:
-            if (!board_mouse_up(g->board, g->event.button.x, g->event.button.y, g->event.button.button))
+            if (!game_mouse_up(g, g->event.button.x, g->event.button.y, g->event.button.button))
             {
                 return false;
             }

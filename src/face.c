@@ -60,7 +60,52 @@ void face_free(struct Face **face)
     }
 }
 
+bool face_mouse_click(struct Face *f, float x, float y, bool down)
+{
+    if (x >= f->dest_rect.x && x < f->dest_rect.x + f->dest_rect.w)
+    {
+        if (y >= f->dest_rect.y && y < f->dest_rect.y + f->dest_rect.h)
+        {
+            if (down)
+            {
+                f->image_index = 1;
+            }
+            else if (f->image_index == 1)
+            {
+                f->image_index = 0;
+                return true;
+            }
+        }
+        else if (!down)
+        {
+            f->image_index = 0;
+        }
+    }
+
+    return false;
+}
+
+void face_default(struct Face *f)
+{
+    f->image_index = 0;
+}
+
+void face_wont(struct Face *f)
+{
+    f->image_index = 3;
+}
+
+void face_lost(struct Face *f)
+{
+    f->image_index = 4;
+}
+
+void face_question(struct Face *f)
+{
+    f->image_index = 2;
+}
+
 void face_draw(const struct Face *f)
 {
-    SDL_RenderTexture(f->renderer, f->image, &f->src_rects[0], &f->dest_rect);
+    SDL_RenderTexture(f->renderer, f->image, &f->src_rects[f->image_index], &f->dest_rect);
 }
