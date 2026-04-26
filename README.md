@@ -2,6 +2,7 @@
 
 ![Screenshot](screenshot.png)
 ![Screenshot](screenshot2.png)
+![Screenshot](screenshot3.png)
 
 Implementação do clássico **Campo Minado** desenvolvida em **C** utilizando a biblioteca **SDL3**.
 
