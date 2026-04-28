@@ -13,10 +13,17 @@ struct Mines
     SDL_FRect back_dest_rect;
     float digit_width;
     float digit_height;
+    unsigned digits[3];
+    int mine_count;
+    float scale;
 };
 
-bool mines_new(struct Mines **mines, SDL_Renderer *renderer);
+bool mines_new(struct Mines **mines, SDL_Renderer *renderer, int mine_count, float scale);
 void mines_free(struct Mines **mines);
+void mines_reset(struct Mines *m, int mine_count);
+void mines_set_scale(struct Mines *m, float scale);
+void mines_increment(struct Mines *m);
+void mines_decrement(struct Mines *m);
 void mines_draw(const struct Mines *m);
 
 #endif

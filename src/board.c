@@ -9,7 +9,7 @@ bool board_uncover(struct Board *b);
 void board_reveal(struct Board *b);
 void board_check_won(struct Board *b);
 
-bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows, unsigned columns, int mine_count)
+bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows, unsigned columns, int mine_count, float scale)
 {
     *board = calloc(1, sizeof(struct Board));
     if (*board == NULL)
@@ -24,12 +24,7 @@ bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows, unsi
     b->rows = rows;
     b->columns = columns;
     b->mine_count = mine_count;
-
-    b->piece_size = PIECE_SIZE * 2;
-    b->rect.x = (PIECE_SIZE - BORDER_LEFT) * 2;
-    b->rect.y = BORDER_HEIGHT * 2;
-    b->rect.w = (float)b->columns * b->piece_size;
-    b->rect.h = (float)b->rows * b->piece_size;
+    b->scale = scale;
 
     if (!load_media_sheet(b->renderer, &b->image, "images/board.png", PIECE_SIZE, PIECE_SIZE, &b->src_rects))
     {
@@ -40,6 +35,8 @@ bool board_new(struct Board **board, SDL_Renderer *renderer, unsigned rows, unsi
     {
         return false;
     }
+
+    board_set_scale(b, b->scale);
 
     return true;
 }
@@ -234,9 +231,24 @@ bool board_reset(struct Board *b, int mine_count, bool full_reset)
     return true;
 }
 
+void board_set_scale(struct Board *b, float scale)
+{
+    b->scale = scale;
+    b->piece_size = PIECE_SIZE * b->scale;
+    b->rect.x = (PIECE_SIZE - BORDER_LEFT) * b->scale;
+    b->rect.y = BORDER_HEIGHT * b->scale;
+    b->rect.w = (float)b->columns * b->piece_size;
+    b->rect.h = (float)b->rows * b->piece_size;
+}
+
 enum GameState board_game_state(const struct Board *b)
 {
     return b->game_state;
+}
+
+int board_mine_marked(const struct Board *b)
+{
+    return b->mine_maked;
 }
 
 bool board_is_pressed(const struct Board *b)
@@ -394,6 +406,8 @@ void board_mouse_down(struct Board *b, float x, float y, Uint8 button)
 
 bool board_mouse_up(struct Board *b, float x, float y, Uint8 button)
 {
+    b->mine_maked = 0;
+
     if (button == SDL_BUTTON_LEFT)
     {
         if (!b->left_pressed)
@@ -463,7 +477,6 @@ bool board_mouse_up(struct Board *b, float x, float y, Uint8 button)
 
                 if (b->first_turn && b->game_state != GAME_PLAY)
                 {
-                    printf("Foi resetado. \n");
                     if (!board_reset(b, b->mine_count, false))
                     {
                         return false;
@@ -482,19 +495,23 @@ bool board_mouse_up(struct Board *b, float x, float y, Uint8 button)
                 board_reveal(b);
             }
         }
-
-        // return true;
     }
 
     if (button == SDL_BUTTON_RIGHT)
     {
-        if (b->from_array[row][column] == 11)
-        {
-            b->from_array[row][column] = 9;
-        }
-        else if (b->from_array[row][column] > 8 && b->from_array[row][column] < 12)
+        if (b->from_array[row][column] == 9)
         {
             b->from_array[row][column]++;
+            b->mine_maked = -1;
+        }
+        else if (b->from_array[row][column] == 10)
+        {
+            b->from_array[row][column]++;
+            b->mine_maked = 1;
+        }
+        else if (b->from_array[row][column] == 11)
+        {
+            b->from_array[row][column] = 9;
         }
     }
 

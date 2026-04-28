@@ -14,10 +14,18 @@ struct Clock
     float digit_width;
     float digit_height;
     unsigned columns;
+    unsigned digits[3];
+    unsigned seconds;
+    Uint64 last_time;
+    float scale;
 };
 
-bool clock_new(struct Clock **clock, SDL_Renderer *renderer, unsigned columns);
+bool clock_new(struct Clock **clock, SDL_Renderer *renderer, unsigned columns, float scale);
 void clock_free(struct Clock **clock);
 void clock_draw(const struct Clock *c);
+void clock_reset(struct Clock *c);
+void clock_set_scale(struct Clock *c, float scale);
+void clock_update(struct Clock *c);
+void clock_update_digits(struct Clock *c);
 
 #endif

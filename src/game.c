@@ -1,11 +1,11 @@
 #include "game.h"
-#include "board.h"
-#include "face.h"
 #include "init_sdl.h"
 
+void game_set_scale(struct Game *g);
 bool game_reset(struct Game *g);
 bool game_events(struct Game *g);
 void game_draw(struct Game *g);
+void game_update(struct Game *g);
 void game_mouse_down(struct Game *g, float x, float y, Uint8 button);
 bool game_mouse_up(struct Game *g, float x, float y, Uint8 button);
 
@@ -26,6 +26,7 @@ bool game_new(struct Game **game)
     g->rows = 9;
     g->columns = 9;
     g->mine_count = 8;
+    g->scale = 2;
 
     if (!game_init_sdl(g))
     {
@@ -34,27 +35,27 @@ bool game_new(struct Game **game)
 
     srand((unsigned)time(NULL));
 
-    if (!border_new(&g->border, g->renderer, g->rows, g->columns))
+    if (!border_new(&g->border, g->renderer, g->rows, g->columns, g->scale))
     {
         return false;
     }
 
-    if (!board_new(&g->board, g->renderer, g->rows, g->columns, g->mine_count))
+    if (!board_new(&g->board, g->renderer, g->rows, g->columns, g->mine_count, g->scale))
     {
         return false;
     }
 
-    if (!mines_new(&g->mines, g->renderer))
+    if (!mines_new(&g->mines, g->renderer, g->mine_count, g->scale))
     {
         return false;
     }
 
-    if (!clock_new(&g->clock, g->renderer, g->columns))
+    if (!clock_new(&g->clock, g->renderer, g->columns, g->scale))
     {
         return false;
     }
 
-    if (!face_new(&g->face, g->renderer, g->columns))
+    if (!face_new(&g->face, g->renderer, g->columns, g->scale))
     {
         return false;
     }
@@ -122,9 +123,42 @@ bool game_reset(struct Game *g)
         return false;
     }
 
+    face_default(g->face);
+    clock_reset(g->clock);
+    mines_reset(g->mines, g->mine_count);
+
     g->is_playing = true;
 
     return true;
+}
+
+void game_set_scale(struct Game *g)
+{
+    border_set_scale(g->border, g->scale);
+    board_set_scale(g->board, g->scale);
+    mines_set_scale(g->mines, g->scale);
+    clock_set_scale(g->clock, g->scale);
+    face_set_scale(g->face, g->scale);
+
+    int window_width = (int)((PIECE_SIZE * ((float)g->columns + 1) - BORDER_LEFT + BORDER_RIGHT) * g->scale);
+    int window_height = (int)((PIECE_SIZE * (float)g->rows + BORDER_HEIGHT + BORDER_BOTTOM) * g->scale);
+
+    SDL_SetWindowSize(g->window, window_width, window_height);
+    SDL_SetWindowPosition(g->window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+}
+
+void game_toggle_scale(struct Game *g)
+{
+    g->scale = (g->scale < 3) ? g->scale + 1 : 1;
+    game_set_scale(g);
+}
+
+void game_update(struct Game *g)
+{
+    if (g->is_playing)
+    {
+        clock_update(g->clock);
+    }
 }
 
 void game_mouse_down(struct Game *g, float x, float y, Uint8 button)
@@ -163,6 +197,15 @@ bool game_mouse_up(struct Game *g, float x, float y, Uint8 button)
         if (!board_mouse_up(g->board, x, y, button))
         {
             return false;
+        }
+
+        if (board_mine_marked(g->board) == 1)
+        {
+            mines_increment(g->mines);
+        }
+        else if (board_mine_marked(g->board) == -1)
+        {
+            mines_decrement(g->mines);
         }
     }
 
@@ -208,6 +251,9 @@ bool game_events(struct Game *g)
             case SDL_SCANCODE_ESCAPE:
                 g->is_running = false;
                 break;
+            case SDL_SCANCODE_B:
+                game_toggle_scale(g);
+                break;
             default:
                 break;
             }
@@ -242,6 +288,7 @@ bool game_run(struct Game *g)
             return false;
         }
 
+        game_update(g);
         game_draw(g);
 
         SDL_Delay(16);

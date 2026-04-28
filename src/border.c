@@ -3,7 +3,7 @@
 
 void border_draw(const struct Border *b);
 
-bool border_new(struct Border **border, SDL_Renderer *renderer, unsigned rows, unsigned columns)
+bool border_new(struct Border **border, SDL_Renderer *renderer, unsigned rows, unsigned columns, float scale)
 {
     *border = calloc(1, sizeof(struct Border));
     if (*border == NULL)
@@ -17,15 +17,14 @@ bool border_new(struct Border **border, SDL_Renderer *renderer, unsigned rows, u
     b->renderer = renderer;
     b->rows = rows;
     b->columns = columns;
-
-    b->left_offset = BORDER_LEFT * 2;
-    b->piece_width = PIECE_SIZE * 2;
-    b->piece_height = BORDER_HEIGHT * 2;
+    b->scale = scale;
 
     if (!load_media_sheet(b->renderer, &b->image, "images/borders.png", PIECE_SIZE, BORDER_HEIGHT, &b->src_rects))
     {
         return false;
     }
+
+    border_set_scale(b, b->scale);
 
     return true;
 }
@@ -56,6 +55,14 @@ void border_free(struct Border **border)
 
         printf("Free border.\n");
     }
+}
+
+void border_set_scale(struct Border *b, float scale)
+{
+    b->scale = scale;
+    b->left_offset = BORDER_LEFT * b->scale;
+    b->piece_width = PIECE_SIZE * b->scale;
+    b->piece_height = BORDER_HEIGHT * b->scale;
 }
 
 void border_draw(const struct Border *b)

@@ -1,7 +1,9 @@
 #include "mines.h"
 #include "load_media.h"
 
-bool mines_new(struct Mines **mines, SDL_Renderer *renderer)
+void mines_update_digits(struct Mines *m);
+
+bool mines_new(struct Mines **mines, SDL_Renderer *renderer, int mine_count, float scale)
 {
     *mines = calloc(1, sizeof(struct Mines));
 
@@ -14,13 +16,8 @@ bool mines_new(struct Mines **mines, SDL_Renderer *renderer)
     struct Mines *m = *mines;
 
     m->renderer = renderer;
-
-    m->back_dest_rect.x = DIGIT_BACK_LEFT * 2;
-    m->back_dest_rect.y = DIGIT_BACK_TOP * 2;
-    m->back_dest_rect.w = DIGIT_BACK_WIDTH * 2;
-    m->back_dest_rect.h = DIGIT_BACK_HEIGHT * 2;
-    m->digit_width = DIGIT_WIDTH * 2;
-    m->digit_height = DIGIT_HEIGHT * 2;
+    m->mine_count = mine_count;
+    m->scale = scale;
 
     if (!load_media_sheet(m->renderer, &m->back_image, "images/digitback.png", DIGIT_BACK_WIDTH, DIGIT_BACK_HEIGHT, &m->back_src_rects))
     {
@@ -31,6 +28,9 @@ bool mines_new(struct Mines **mines, SDL_Renderer *renderer)
     {
         return false;
     }
+
+    mines_update_digits(m);
+    mines_set_scale(m, m->scale);
 
     return true;
 }
@@ -75,6 +75,67 @@ void mines_free(struct Mines **mines)
     }
 }
 
+void mines_update_digits(struct Mines *m)
+{
+    unsigned mine_count = (unsigned)abs(m->mine_count);
+
+    if (m->mine_count > 999)
+    {
+        mine_count = 999;
+    }
+
+    if (m->mine_count < -99)
+    {
+        mine_count = -99;
+    }
+
+    if (mine_count > 99)
+    {
+        m->digits[0] = mine_count / 100;
+    }
+    else if (m->mine_count < 0)
+    {
+        m->digits[0] = 10;
+    }
+    else
+    {
+        m->digits[0] = 11;
+    }
+
+    m->digits[1] = (mine_count > 9) ? (mine_count / 10) % 10 : 11;
+
+    m->digits[2] = mine_count % 10;
+}
+
+void mines_reset(struct Mines *m, int mine_count)
+{
+    m->mine_count = mine_count;
+    mines_update_digits(m);
+}
+
+void mines_set_scale(struct Mines *m, float scale)
+{
+    m->scale = scale;
+    m->back_dest_rect.x = DIGIT_BACK_LEFT * m->scale;
+    m->back_dest_rect.y = DIGIT_BACK_TOP * m->scale;
+    m->back_dest_rect.w = DIGIT_BACK_WIDTH * m->scale;
+    m->back_dest_rect.h = DIGIT_BACK_HEIGHT * m->scale;
+    m->digit_width = DIGIT_WIDTH * m->scale;
+    m->digit_height = DIGIT_HEIGHT * m->scale;
+}
+
+void mines_increment(struct Mines *m)
+{
+    m->mine_count++;
+    mines_update_digits(m);
+}
+
+void mines_decrement(struct Mines *m)
+{
+    m->mine_count--;
+    mines_update_digits(m);
+}
+
 void mines_draw(const struct Mines *m)
 {
     SDL_RenderTexture(m->renderer, m->back_image, &m->back_src_rects[0], &m->back_dest_rect);
@@ -84,6 +145,6 @@ void mines_draw(const struct Mines *m)
     for (int i = 0; i < 3; i++)
     {
         digit_rect.x = m->back_dest_rect.x + 2 + digit_rect.w * (float)i;
-        SDL_RenderTexture(m->renderer, m->digit_image, &m->digit_src_rects[0], &digit_rect);
+        SDL_RenderTexture(m->renderer, m->digit_image, &m->digit_src_rects[m->digits[i]], &digit_rect);
     }
 }

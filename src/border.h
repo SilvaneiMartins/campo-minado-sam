@@ -13,11 +13,13 @@ struct Border
     float piece_height;
     float piece_width;
     float left_offset;
+    float scale;
 };
 
 bool border_new(struct Border **border, SDL_Renderer *renderer, unsigned rows,
-                unsigned columns);
+                unsigned columns, float scale);
 void border_free(struct Border **border);
+void border_set_scale(struct Border *b, float scale);
 void border_draw(const struct Border *b);
 
 #endif

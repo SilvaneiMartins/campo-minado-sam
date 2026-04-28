@@ -23,6 +23,7 @@ struct Game
     bool is_running;
     bool is_playing;
     int mine_count;
+    float scale;
 };
 
 bool game_new(struct Game **game);

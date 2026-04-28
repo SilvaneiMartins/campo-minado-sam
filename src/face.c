@@ -1,7 +1,7 @@
 #include "face.h"
 #include "load_media.h"
 
-bool face_new(struct Face **face, SDL_Renderer *renderer, unsigned columns)
+bool face_new(struct Face **face, SDL_Renderer *renderer, unsigned columns, float scale)
 {
     *face = calloc(1, sizeof(struct Face));
 
@@ -15,19 +15,15 @@ bool face_new(struct Face **face, SDL_Renderer *renderer, unsigned columns)
 
     f->renderer = renderer;
     f->columns = columns;
-
-    f->dest_rect.x = ((PIECE_SIZE * (float)f->columns - FACE_SIZE) / 2 +
-                      PIECE_SIZE - BORDER_LEFT) *
-                     2;
-    f->dest_rect.y = FACE_TOP * 2;
-    f->dest_rect.w = FACE_SIZE * 2;
-    f->dest_rect.h = FACE_SIZE * 2;
+    f->scale = scale;
 
     if (!load_media_sheet(f->renderer, &f->image, "images/faces.png", FACE_SIZE,
                           FACE_SIZE, &f->src_rects))
     {
         return false;
     }
+
+    face_set_scale(f, f->scale);
 
     return true;
 }
@@ -58,6 +54,17 @@ void face_free(struct Face **face)
 
         printf("Free face.\n");
     }
+}
+
+void face_set_scale(struct Face *f, float scale)
+{
+    f->scale = scale;
+    f->dest_rect.x = ((PIECE_SIZE * (float)f->columns - FACE_SIZE) / 2 +
+                      PIECE_SIZE - BORDER_LEFT) *
+                     f->scale;
+    f->dest_rect.y = FACE_TOP * f->scale;
+    f->dest_rect.w = FACE_SIZE * f->scale;
+    f->dest_rect.h = FACE_SIZE * f->scale;
 }
 
 bool face_mouse_click(struct Face *f, float x, float y, bool down)
