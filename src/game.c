@@ -5,6 +5,7 @@ bool game_reset(struct Game *g);
 void game_set_scale(struct Game *g);
 void game_toggle_scale(struct Game *g);
 bool game_set_size(struct Game *g, unsigned rows, unsigned columns, float scale);
+bool game_set_difficulty(struct Game *g, float difficulty);
 void game_mouse_down(struct Game *g, float x, float y, Uint8 button);
 bool game_mouse_up(struct Game *g, float x, float y, Uint8 button);
 bool game_events(struct Game *g);
@@ -29,6 +30,7 @@ bool game_new(struct Game **game)
     g->columns = 9;
     g->mine_count = 8;
     g->scale = 2;
+    g->difficulty = 0.1;
 
     if (!game_init_sdl(g))
     {
@@ -120,6 +122,8 @@ void game_free(struct Game **game)
 
 bool game_reset(struct Game *g)
 {
+    g->mine_count = (int)((float)(g->rows * g->columns) * g->difficulty + 0.5f);
+
     if (!board_reset(g->board, g->mine_count, true))
     {
         return false;
@@ -167,6 +171,18 @@ bool game_set_size(struct Game *g, unsigned rows, unsigned columns, float scale)
     face_set_size(g->face, g->columns);
 
     game_set_scale(g);
+
+    if (!game_reset(g))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool game_set_difficulty(struct Game *g, float difficulty)
+{
+    g->difficulty = difficulty;
 
     if (!game_reset(g))
     {
@@ -276,6 +292,30 @@ bool game_events(struct Game *g)
                 break;
             case SDL_SCANCODE_B:
                 game_toggle_scale(g);
+                break;
+            case SDL_SCANCODE_A:
+                if (!game_set_difficulty(g, 0.1f))
+                {
+                    return false;
+                }
+                break;
+            case SDL_SCANCODE_S:
+                if (!game_set_difficulty(g, 0.133f))
+                {
+                    return false;
+                }
+                break;
+            case SDL_SCANCODE_D:
+                if (!game_set_difficulty(g, 0.166f))
+                {
+                    return false;
+                }
+                break;
+            case SDL_SCANCODE_F:
+                if (!game_set_difficulty(g, 0.2f))
+                {
+                    return false;
+                }
                 break;
             case SDL_SCANCODE_Q:
                 if (!game_set_size(g, 9, 9, 2))
