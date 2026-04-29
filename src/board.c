@@ -250,6 +250,11 @@ void board_set_size(struct Board *b, unsigned rows, unsigned columns)
     b->rect.h = (float)b->rows * b->piece_size;
 }
 
+void board_set_theme(struct Board *b, unsigned theme)
+{
+    b->theme = theme * 16;
+}
+
 enum GameState board_game_state(const struct Board *b)
 {
     return b->game_state;
@@ -539,7 +544,7 @@ void board_draw(const struct Board *b)
         {
             dest_rect.x = (float)column * b->piece_size + b->rect.x;
             unsigned index = b->from_array[row][column];
-            SDL_RenderTexture(b->renderer, b->image, &b->src_rects[index], &dest_rect);
+            SDL_RenderTexture(b->renderer, b->image, &b->src_rects[index + b->theme], &dest_rect);
         }
     }
 }

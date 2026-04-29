@@ -75,6 +75,11 @@ void face_set_size(struct Face *f, unsigned columns)
                      f->scale;
 }
 
+void face_set_theme(struct Face *f, unsigned theme)
+{
+    f->theme = theme * 5;
+}
+
 bool face_mouse_click(struct Face *f, float x, float y, bool down)
 {
     if (x >= f->dest_rect.x && x < f->dest_rect.x + f->dest_rect.w)
@@ -122,5 +127,5 @@ void face_question(struct Face *f)
 
 void face_draw(const struct Face *f)
 {
-    SDL_RenderTexture(f->renderer, f->image, &f->src_rects[f->image_index], &f->dest_rect);
+    SDL_RenderTexture(f->renderer, f->image, &f->src_rects[f->image_index + f->theme], &f->dest_rect);
 }

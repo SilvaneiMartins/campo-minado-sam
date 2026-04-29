@@ -29,6 +29,7 @@ struct Board
     bool first_turn;
     int mine_maked;
     float scale;
+    unsigned theme;
 };
 
 struct Node
@@ -44,6 +45,7 @@ void board_free(struct Board **board);
 bool board_reset(struct Board *g, int mine_count, bool full_reset);
 void board_set_scale(struct Board *b, float scale);
 void board_set_size(struct Board *b, unsigned rows, unsigned columns);
+void board_set_theme(struct Board *b, unsigned theme);
 enum GameState board_game_state(const struct Board *b);
 int board_mine_marked(const struct Board *b);
 bool board_is_pressed(const struct Board *b);

@@ -18,6 +18,8 @@ struct Clock
     unsigned seconds;
     Uint64 last_time;
     float scale;
+    unsigned back_theme;
+    unsigned digit_theme;
 };
 
 bool clock_new(struct Clock **clock, SDL_Renderer *renderer, unsigned columns, float scale);
@@ -26,6 +28,7 @@ void clock_draw(const struct Clock *c);
 void clock_reset(struct Clock *c);
 void clock_set_scale(struct Clock *c, float scale);
 void clock_set_size(struct Clock *c, unsigned columns);
+void clock_set_theme(struct Clock *c, unsigned theme);
 void clock_update(struct Clock *c);
 void clock_update_digits(struct Clock *c);
 

@@ -12,12 +12,14 @@ struct Face
     unsigned columns;
     unsigned image_index;
     float scale;
+    unsigned theme;
 };
 
 bool face_new(struct Face **face, SDL_Renderer *renderer, unsigned columns, float scale);
 void face_free(struct Face **face);
 void face_set_scale(struct Face *f, float scale);
 void face_set_size(struct Face *f, unsigned columns);
+void face_set_theme(struct Face *f, unsigned theme);
 bool face_mouse_click(struct Face *f, float x, float y, bool down);
 void face_default(struct Face *f);
 void face_wont(struct Face *f);

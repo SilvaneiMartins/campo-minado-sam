@@ -25,6 +25,8 @@ struct Game
     int mine_count;
     float scale;
     float difficulty;
+    char *size_str;
+    char *diff_str;
 };
 
 bool game_new(struct Game **game);

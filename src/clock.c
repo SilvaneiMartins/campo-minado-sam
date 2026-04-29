@@ -115,6 +115,12 @@ void clock_set_size(struct Clock *c, unsigned columns)
                           c->scale;
 }
 
+void clock_set_theme(struct Clock *c, unsigned theme)
+{
+    c->back_theme = theme;
+    c->digit_theme = theme * 12;
+}
+
 void clock_update(struct Clock *c)
 {
     Uint64 current_time = SDL_GetTicks();
@@ -139,13 +145,15 @@ void clock_update(struct Clock *c)
 
 void clock_draw(const struct Clock *c)
 {
-    SDL_RenderTexture(c->renderer, c->back_image, &c->back_src_rects[0], &c->back_dest_rect);
+    SDL_RenderTexture(c->renderer, c->back_image,
+                      &c->back_src_rects[c->back_theme], &c->back_dest_rect);
 
     SDL_FRect digit_rect = {0, c->back_dest_rect.y + 2, c->digit_width, c->digit_height};
 
     for (int i = 0; i < 3; i++)
     {
         digit_rect.x = c->back_dest_rect.x + 2 + digit_rect.w * (float)i;
-        SDL_RenderTexture(c->renderer, c->digit_image, &c->digit_src_rects[c->digits[i]], &digit_rect);
+        SDL_RenderTexture(c->renderer, c->digit_image,
+                          &c->digit_src_rects[c->digits[i] + c->digit_theme], &digit_rect);
     }
 }
