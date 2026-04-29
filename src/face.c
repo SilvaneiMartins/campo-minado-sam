@@ -67,6 +67,14 @@ void face_set_scale(struct Face *f, float scale)
     f->dest_rect.h = FACE_SIZE * f->scale;
 }
 
+void face_set_size(struct Face *f, unsigned columns)
+{
+    f->columns = columns;
+    f->dest_rect.x = ((PIECE_SIZE * (float)f->columns - FACE_SIZE) / 2 +
+                      PIECE_SIZE - BORDER_LEFT) *
+                     f->scale;
+}
+
 bool face_mouse_click(struct Face *f, float x, float y, bool down)
 {
     if (x >= f->dest_rect.x && x < f->dest_rect.x + f->dest_rect.w)

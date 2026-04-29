@@ -1,13 +1,15 @@
 #include "game.h"
 #include "init_sdl.h"
 
-void game_set_scale(struct Game *g);
 bool game_reset(struct Game *g);
-bool game_events(struct Game *g);
-void game_draw(struct Game *g);
-void game_update(struct Game *g);
+void game_set_scale(struct Game *g);
+void game_toggle_scale(struct Game *g);
+bool game_set_size(struct Game *g, unsigned rows, unsigned columns, float scale);
 void game_mouse_down(struct Game *g, float x, float y, Uint8 button);
 bool game_mouse_up(struct Game *g, float x, float y, Uint8 button);
+bool game_events(struct Game *g);
+void game_update(struct Game *g);
+void game_draw(struct Game *g);
 
 bool game_new(struct Game **game)
 {
@@ -153,6 +155,27 @@ void game_toggle_scale(struct Game *g)
     game_set_scale(g);
 }
 
+bool game_set_size(struct Game *g, unsigned rows, unsigned columns, float scale)
+{
+    g->rows = rows;
+    g->columns = columns;
+    g->scale = scale;
+
+    border_set_size(g->border, g->rows, g->columns);
+    board_set_size(g->board, g->rows, g->columns);
+    clock_set_size(g->clock, g->columns);
+    face_set_size(g->face, g->columns);
+
+    game_set_scale(g);
+
+    if (!game_reset(g))
+    {
+        return false;
+    }
+
+    return true;
+}
+
 void game_update(struct Game *g)
 {
     if (g->is_playing)
@@ -253,6 +276,36 @@ bool game_events(struct Game *g)
                 break;
             case SDL_SCANCODE_B:
                 game_toggle_scale(g);
+                break;
+            case SDL_SCANCODE_Q:
+                if (!game_set_size(g, 9, 9, 2))
+                {
+                    return false;
+                }
+                break;
+            case SDL_SCANCODE_W:
+                if (!game_set_size(g, 16, 16, 2))
+                {
+                    return false;
+                }
+                break;
+            case SDL_SCANCODE_E:
+                if (!game_set_size(g, 16, 30, 2))
+                {
+                    return false;
+                }
+                break;
+            case SDL_SCANCODE_R:
+                if (!game_set_size(g, 20, 40, 2))
+                {
+                    return false;
+                }
+                break;
+            case SDL_SCANCODE_T:
+                if (!game_set_size(g, 40, 80, 1))
+                {
+                    return false;
+                }
                 break;
             default:
                 break;

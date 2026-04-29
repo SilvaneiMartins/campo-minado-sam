@@ -241,6 +241,15 @@ void board_set_scale(struct Board *b, float scale)
     b->rect.h = (float)b->rows * b->piece_size;
 }
 
+void board_set_size(struct Board *b, unsigned rows, unsigned columns)
+{
+    board_free_array(b);
+    b->rows = rows;
+    b->columns = columns;
+    b->rect.w = (float)b->columns * b->piece_size;
+    b->rect.h = (float)b->rows * b->piece_size;
+}
+
 enum GameState board_game_state(const struct Board *b)
 {
     return b->game_state;

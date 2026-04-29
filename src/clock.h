@@ -25,6 +25,7 @@ void clock_free(struct Clock **clock);
 void clock_draw(const struct Clock *c);
 void clock_reset(struct Clock *c);
 void clock_set_scale(struct Clock *c, float scale);
+void clock_set_size(struct Clock *c, unsigned columns);
 void clock_update(struct Clock *c);
 void clock_update_digits(struct Clock *c);
 

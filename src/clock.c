@@ -97,12 +97,22 @@ void clock_reset(struct Clock *c)
 void clock_set_scale(struct Clock *c, float scale)
 {
     c->scale = scale;
-    c->back_dest_rect.x = (PIECE_SIZE * ((float)c->columns + 1) - BORDER_LEFT - DIGIT_BACK_WIDTH - DIGIT_BACK_RIGHT) * c->scale;
+    c->back_dest_rect.x = (PIECE_SIZE * ((float)c->columns + 1) - BORDER_LEFT -
+                           DIGIT_BACK_WIDTH - DIGIT_BACK_RIGHT) *
+                          c->scale;
     c->back_dest_rect.y = DIGIT_BACK_TOP * c->scale;
     c->back_dest_rect.w = DIGIT_BACK_WIDTH * c->scale;
     c->back_dest_rect.h = DIGIT_BACK_HEIGHT * c->scale;
     c->digit_width = DIGIT_WIDTH * c->scale;
     c->digit_height = DIGIT_HEIGHT * c->scale;
+}
+
+void clock_set_size(struct Clock *c, unsigned columns)
+{
+    c->columns = columns;
+    c->back_dest_rect.x = (PIECE_SIZE * ((float)c->columns + 1) - BORDER_LEFT -
+                           DIGIT_BACK_WIDTH - DIGIT_BACK_RIGHT) *
+                          c->scale;
 }
 
 void clock_update(struct Clock *c)
